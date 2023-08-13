@@ -11,6 +11,7 @@ run:
 	docker run \
 		--name $(CONTAINER_NAME) \
 		--hostname $(CONTAINER_NAME) \
+		-v $(PWD)/interview_task:/home/rosuser/ros_ws/src/interview_task \
 	    -it $(IMAGE_NAME)
 
 # Execute a command inside the running container
