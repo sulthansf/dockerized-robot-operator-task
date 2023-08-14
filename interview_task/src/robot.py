@@ -16,8 +16,9 @@ class Robot:
             self._pub = rospy.Publisher('state', String, queue_size=10)
             self._sub = rospy.Subscriber('action', String, self._callback)
 
-            # Get rate from parameter server
+            # Get parameters from parameter server
             self._rate = rospy.get_param('~rate', 1)
+            self._obstacle_prob = rospy.get_param('~obstacle_prob', 0.25)
 
             # Define headings and obstacle
             self._headings = ["north", "east", "south", "west"]
@@ -25,6 +26,7 @@ class Robot:
 
             # Initialize state
             self._state = {
+                "id": 0,
                 "heading": random.choice(self._headings),
                 "obstacle": random.choice(self._obstacle)
             }
@@ -37,18 +39,24 @@ class Robot:
 
     def _callback(self, msg):
         """Callback function for subscriber"""
-        rospy.loginfo("{}: Action received from operator: {}".format(
-            rospy.get_name(), msg.data))
-        self._update_state(msg.data)
-        rospy.loginfo("{}: New state: Heading: {}, Obstacle: {}".format(
-            rospy.get_name(), self._state["heading"], self._state["obstacle"]))
+        id, action = msg.data.split(" ")
+        rospy.loginfo("{}: Action received from operator: ID: {}, Action: {}".format(
+            rospy.get_name(), id, action))
+        if int(id) == self._state["id"]:
+            # Update state
+            self._update_state(int(id), action)
+            rospy.loginfo("{}: New state: ID: {}, Heading: {}, Obstacle: {}".format(
+                rospy.get_name(), self._state["id"], self._state["heading"], self._state["obstacle"]))
+        else:
+            # Ignore action
+            rospy.loginfo("{}: Action ignored".format(rospy.get_name()))
 
     def _get_state(self):
         """Get state in string format"""
-        return "{} {}".format(self._state["heading"], self._state["obstacle"])
+        return "{} {} {}".format(self._state["id"], self._state["heading"], self._state["obstacle"])
 
-    def _update_state(self, action):
-        """Update state"""
+    def _update_state(self, id, action):
+        """Update state based on action"""
         # Update heading based on action
         if action == "continue":
             pass
@@ -61,7 +69,12 @@ class Robot:
             self._state["heading"] = self._headings[(
                 heading_index + 1) % len(self._headings)]
         # Update obstacle randomly
-        self._state["obstacle"] = random.choice(self._obstacle)
+        if random.random() < self._obstacle_prob:
+            self._state["obstacle"] = self._obstacle[0]
+        else:
+            self._state["obstacle"] = self._obstacle[1]
+        # Update id
+        self._state["id"] += 1
 
     def run(self):
         """Run the node"""

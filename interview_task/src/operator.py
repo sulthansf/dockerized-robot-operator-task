@@ -23,36 +23,41 @@ class Operator:
             self._actions = ["continue", "turn_right", "turn_left"]
 
             # Initialize action
-            self._action = self._actions[0]
+            self._action = {
+                "id": 0,
+                "action": self._actions[0]
+            }
 
         except Exception as e:
             rospy.logerr(e)
 
         else:
             rospy.loginfo("{} initialized".format(rospy.get_name()))
+            # Wait for robot to initialize
+            rospy.wait_for_message('state', String)
 
     def _callback(self, msg):
         """Callback function for subscriber"""
-        heading, obstacle = msg.data.split(" ")
-        rospy.loginfo("{}: Message received from robot: Heading: {}, Obstacle: {}".format(
-            rospy.get_name(), heading, obstacle))
-        self._select_action(msg.data)
-        rospy.loginfo("{}: Action selected: {}".format(
-            rospy.get_name(), self._get_action()))
+        id, heading, obstacle = msg.data.split(" ")
+        rospy.loginfo("{}: State received from robot: ID: {}, Heading: {}, Obstacle: {}".format(
+            rospy.get_name(), id, heading, obstacle))
+        self._select_action(int(id), heading, obstacle)
+        rospy.loginfo("{}: Action selected: ID: {}, Action: {}".format(
+            rospy.get_name(), self._action["id"], self._action["action"]))
 
     def _get_action(self):
         """Get action in string format"""
-        return self._action
+        return "{} {}".format(self._action["id"], self._action["action"])
 
-    def _select_action(self, state):
+    def _select_action(self, id, heading, obstacle):
         """Select action based on state"""
-        heading, obstacle = state.split(" ")
         if obstacle == "false":
-            self._action = self._actions[0]
+            self._action["action"] = self._actions[0]
         elif obstacle == "true":
-            self._action = random.choice(self._actions[1:3])
+            self._action["action"] = random.choice(self._actions[1:3])
         else:
             rospy.logerr("Invalid obstacle value: {}".format(obstacle))
+        self._action["id"] = id
 
     def run(self):
         """Run the node"""
