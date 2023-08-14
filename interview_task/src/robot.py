@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import random
+from cipher_kit import Cipher
 import rospy
 from std_msgs.msg import String
 
@@ -19,6 +20,7 @@ class Robot:
             # Get parameters from parameter server
             self._rate = rospy.get_param('~rate', 1)
             self._obstacle_prob = rospy.get_param('~obstacle_prob', 0.25)
+            self._secret_key = rospy.get_param('~secret_key', 'secret_key')
 
             # Define headings and obstacle
             self._headings = ["north", "east", "south", "west"]
@@ -39,7 +41,7 @@ class Robot:
 
     def _callback(self, msg):
         """Callback function for subscriber"""
-        id, action = msg.data.split(" ")
+        id, action = Cipher.decrypt(msg.data, self._secret_key).split(" ")
         rospy.loginfo("{}: Action received from operator: ID: {}, Action: {}".format(
             rospy.get_name(), id, action))
         if int(id) == self._state["id"]:
@@ -82,7 +84,8 @@ class Robot:
         while not rospy.is_shutdown():
             try:
                 # Publish state and sleep
-                self._pub.publish(self._get_state())
+                self._pub.publish(Cipher.encrypt(
+                    self._get_state(), self._secret_key))
                 rate.sleep()
 
             except rospy.ROSInterruptException:

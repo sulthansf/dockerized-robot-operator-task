@@ -1,9 +1,12 @@
 <launch>
+    <arg name="secret_key" default="secret_key" />
     <node pkg="interview_task" type="robot.py" name="robot" output="screen">
         <param name="rate" value="1" />
         <param name="obstacle_prob" value="0.25" />
+        <param name="secret_key" value="$(arg secret_key)" />
     </node>
     <node pkg="interview_task" type="operator.py" name="operator" output="screen">
         <param name="rate" value="1" />
+        <param name="secret_key" value="$(arg secret_key)" />
     </node>
 </launch>

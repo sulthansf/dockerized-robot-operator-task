@@ -4,6 +4,13 @@ FROM osrf/ros:noetic-desktop
 # Create a user named rosuser without a password
 RUN useradd -m -s /bin/bash rosuser
 
+# Install the required packages
+RUN apt-get update && apt-get install -y \
+    python3-pip
+
+# Install Python packages
+RUN pip3 install cipher-kit
+
 # Set the user
 USER rosuser
 
