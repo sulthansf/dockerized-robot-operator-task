@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="interview_task" type="node_a.py" name="node_a" output="screen">
+        <param name="rate" value="1" />
+    </node>
+    <node pkg="interview_task" type="node_b.py" name="node_b" output="screen">
+        <param name="rate" value="1" />
+    </node>
+</launch>
