@@ -18,6 +18,10 @@ run:
 exec:
 	docker exec -it $(CONTAINER_NAME) bash
 
+# Attach to the running container
+attach:
+	docker attach $(CONTAINER_NAME)
+
 # Stop the running container
 stop:
 	docker stop $(CONTAINER_NAME)
@@ -26,14 +30,14 @@ stop:
 start:
 	docker start $(CONTAINER_NAME)
 
-# Rebuild the Docker image and recreate the container
-rebuild: stop build run
-
 # Stop and remove the container and image
 clean:
 	-docker stop $(CONTAINER_NAME)
 	-docker rm $(CONTAINER_NAME)
 	-docker rmi $(IMAGE_NAME)
+
+# Rebuild the Docker image and recreate the container
+rebuild: clean build run
 
 # Default target
 all: build run
