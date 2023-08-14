@@ -29,5 +29,6 @@ RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash && \
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc && \
     echo "source /home/rosuser/ros_ws/devel/setup.bash" >> ~/.bashrc
 
-# Set the default command to bash
-CMD ["bash"]
+# Set the default command to launch the nodes
+CMD /bin/bash -c "source /home/rosuser/ros_ws/devel/setup.bash && \
+                  roslaunch interview_task nodes.launch"
