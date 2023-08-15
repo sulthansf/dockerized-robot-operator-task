@@ -1,10 +1,107 @@
-Your task is to create a containerized system where on start it launches two ROS nodes. Each ROS node should publish a string message to a topic once a second and the other ROS node should subscribe to that topic and print the string message it receives from its subscription. In the end they should both be publishing and subscribing to each other over two ROS topics. Once you have set up this system, think about and implement something creative that the nodes could do. There's no right answer here!
+# Containerized ROS System
 
-The container should be running ROS Noetic. The preferred language is Python. We recommend you use Docker for containerization, but if there is another tool you prefer for containerization, then feel free to use that.
+This repository contains a containerized ROS system consisting of an imaginary robot that moves in a 2D plane with random obstacles and an operator that sends commands to the robot to avoid the obstacles. The robot and the operator communicate with each other through ROS topics using encrypted String messages.\
+The system is implemented in Python and containerized using Docker. The `Dockerfile` contains the instructions for building the Docker image, which is based on the official ROS Noetic Docker image. The `Makefile` contains the commands for building the Docker image, running the Docker container and managing the Docker image and container. The `interview_task` directory contains the ROS package for the system. 
 
-Please prepare a README that makes it easy to understand what you have setup and how to run the system. Go ahead and replace these instructions with your README.
+## ROS Nodes
 
-Some starting materials if you are not familiar with ROS or Docker:
-* [ROS in Python example](http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29)
-* [Docker intro](https://docker-curriculum.com/)
-* [OSRF's Dockerhub](https://hub.docker.com/r/osrf/ros/tags)
+### Robot Node
+
+The robot node is implemented in the `robot.py` file in the `interview_task/src` directory. The node publishes the robot's current heading and obstacle detection status to the `state` topic. The obstacle detection status is determined by a random number generator and the probability of detecting an obstacle is set by the `obstacle_prob` parameter. The node also listens for action commands on the `action` topic and performs the commanded action. The states and actions are published as encrypted String messages.
+
+#### Subscribed Topics
+
+- `action` (std_msgs/String)
+
+#### Published Topics
+
+- `state` (std_msgs/String)
+
+#### Parameters
+
+- `rate` (float): The rate at which the node publishes the robot's state in Hz. Default: 1.0
+- `obstacle_prob` (float): The probability of the robot detecting an obstacle. Default: 0.25
+- `secret_key` (string): The secret key used for ciphering. It must match the `secret_key` used for the operator node. Default: "secret_key"
+
+### Operator Node
+
+The operator node is implemented in the `operator.py` file in the `interview_task/src` directory. The node subscribes to the `state` topic and sends action commands to the robot node through the `action` topic. The actions are designed to make the robot continue in the current heading when there is no obstacle detected and to make the robot turn right or left with equal probability when there is an obstacle detected. The states and actions are published as encrypted String messages.
+
+#### Subscribed Topics
+
+- `state` (std_msgs/String)
+
+#### Published Topics
+
+- `action` (std_msgs/String)
+
+#### Parameters
+
+- `rate` (float): The rate at which the node publishes the robot's state in Hz. Default: 1.0
+- `secret_key` (string): The secret key used for ciphering. It must match the `secret_key` used for the robot node. Default: "secret_key"
+
+## ROS Launch File
+
+The `nodes.launch` file in the `interview_task/launch` directory is used to launch the robot and operator nodes.
+
+### Arguments
+
+- `secret_key` (string): The secret key to use for ciphering the messages.
+
+## Prerequisites
+
+- Docker: [Installation Guide](https://docs.docker.com/get-docker/)
+
+## Building and Running the System
+
+1. Clone this repository
+```
+git clone https://github.com/frankjjiang/sulthan_interview.git
+```
+2. Change directory to the repository directory
+```
+cd sulthan_interview
+```
+3. Build the Docker image and run the Docker container
+```
+make build run
+```
+
+## Using the System
+
+- When the container is running, the nodes will be started automatically by default and the terminal will be attached to the container. The robot node will start publishing its state and the operator node will start sending action commands to the robot node.
+- To detach from the container, press `Ctrl + P` followed by `Ctrl + Q`.
+
+## Useful Commands
+The following commands can be used to manage the Docker image and container while the current working directory is the repository directory.
+- Attach to a running container:
+```
+make attach
+```
+- Open a new terminal in the container:
+```
+make exec
+```
+- Stop the container:
+```
+make stop
+```
+- Start the stopped container:
+```
+make start
+```
+- Remove the container and image:
+```
+make clean
+```
+- Rebuild the image and run the container:
+```
+make rebuild
+```
+
+## Cleaning Up
+
+To clean up the Docker image and container, run the following command while the current working directory is the repository directory.
+```
+make clean
+```
