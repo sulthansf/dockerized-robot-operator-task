@@ -56,11 +56,11 @@ The `nodes.launch` file in the `interview_task/launch` directory is used to laun
 
 1. Clone this repository
 ```
-git clone https://github.com/frankjjiang/sulthan_interview.git
+git clone https://github.com/sulthansf/dockerized-robot-operator-task.git
 ```
 2. Change directory to the repository directory
 ```
-cd sulthan_interview
+cd dockerized-robot-operator-task
 ```
 3. Build the Docker image and run the Docker container
 ```
